@@ -1,29 +1,850 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสถิติ - สังคมสงเคราะห์</title> <link rel="icon" type="image/png" href="https://img2.pic.in.th/Logo-sw.png">
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden; 
-        }
-        iframe {
-            border: none;
-            width: 100%;
-            height: 100vh; 
-            display: block;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บันทึกสถิติสังคมสงเคราะห์</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+
+    .bg-maroon { background-color: #7f1d1d; }
+    .text-maroon { color: #7f1d1d; }
+    .border-maroon { border-color: #7f1d1d; }
+    .hover-bg-maroon:hover { background-color: #991b1b; }
+
+    .input-field {
+        background-color: #ffffff;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 0.625rem 0.75rem;
+        width: 100%;
+        color: #1e293b;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
+    }
+    .input-field:focus {
+        border-color: #7f1d1d;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(127, 29, 29, 0.1);
+    }
+
+    label { color: #334155; font-weight: 600; margin-bottom: 0.25rem; display: block; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    #stepNav { position: sticky; top: 0; z-index: 40; }
+    .step-link { white-space: nowrap; }
+    .step-link.step-active { background-color: #fee2e2; color: #7f1d1d; }
+
+    .required-mark { color: #dc2626; margin-left: 2px; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen pb-10">
 
-    <iframe src="https://script.google.com/macros/s/AKfycbz59-fpy2xh0fWVl5x8jANIP_Kn3YtZdYJHcteEpkxKGt3wmGCxp2D6LG3cqoUNTMymSg/exec">
-        Browser ของคุณไม่รองรับ iframe
-    </iframe>
+  <div class="bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] text-white shadow-lg border-b-4 border-yellow-400 relative overflow-hidden">
+    <div class="absolute inset-0 bg-white opacity-5 pointer-events-none" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
 
+    <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between relative z-10 gap-4 md:gap-0">
+
+      <div class="flex items-center space-x-4 w-full md:w-auto justify-center md:justify-start">
+        <div class="bg-white p-1 rounded-full shadow-md">
+           <img src="https://img2.pic.in.th/Logo-sw6944b6d81ee7918a02.png" alt="Logo" class="h-14 w-14 object-contain rounded-full">
+        </div>
+        <div class="text-center md:text-left">
+          <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white drop-shadow-sm">กลุ่มงานสังคมสงเคราะห์</h1>
+          <p class="text-sm text-red-100 font-medium tracking-wide">โรงพยาบาลสมเด็จพระสังฆราช (อมฺพรมหาเถร)</p>
+        </div>
+      </div>
+
+      <div id="navPlaceholder" class="w-full md:w-auto flex justify-center md:justify-end"></div>
+
+    </div>
+  </div>
+
+  <div id="stepNav" class="bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm">
+    <div class="container mx-auto px-4 max-w-4xl flex gap-2 overflow-x-auto py-2 text-sm">
+      <a href="#sec1" class="step-link px-3 py-1.5 rounded-full font-bold text-gray-500 hover:bg-red-50 hover:text-maroon">1. ข้อมูลบริการ</a>
+      <a href="#sec2" class="step-link px-3 py-1.5 rounded-full font-bold text-gray-500 hover:bg-red-50 hover:text-maroon">2. ผู้ใช้บริการ</a>
+      <a href="#sec3" class="step-link px-3 py-1.5 rounded-full font-bold text-gray-500 hover:bg-red-50 hover:text-maroon">3. คลินิก/สังคม</a>
+      <a href="#sec4" class="step-link px-3 py-1.5 rounded-full font-bold text-gray-500 hover:bg-red-50 hover:text-maroon">4. วินิจฉัยปัญหา</a>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 mt-6 max-w-4xl">
+
+    <div id="editBanner" class="hidden mb-4 bg-yellow-50 border-2 border-yellow-300 text-yellow-800 rounded-xl p-4 flex items-center justify-between gap-3">
+      <div class="flex items-center">
+        <span class="text-xl mr-2">✏️</span>
+        <span>กำลังแก้ไขข้อมูลของ <b id="editBannerName">-</b> — บันทึกเมื่อยืนยันการแก้ไขแล้วเท่านั้น</span>
+      </div>
+      <a href="search.html" class="text-sm underline whitespace-nowrap">ยกเลิก</a>
+    </div>
+
+    <div id="draftBanner" class="hidden mb-4 bg-blue-50 border-2 border-blue-200 text-blue-800 rounded-xl p-4 flex items-center justify-between gap-3">
+      <div class="flex items-center">
+        <span class="text-xl mr-2">📄</span>
+        <span>พบข้อมูลที่กรอกค้างไว้ ระบบกู้คืนให้อัตโนมัติแล้ว</span>
+      </div>
+      <button type="button" onclick="clearDraft(true)" class="text-sm underline whitespace-nowrap">ล้างฉบับร่าง</button>
+    </div>
+
+    <form id="socialForm" class="space-y-6" onsubmit="submitForm(event)">
+
+      <div id="sec1" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden scroll-mt-16">
+        <div class="bg-red-50 px-6 py-4 border-l-8 border-maroon flex items-center">
+            <span class="text-2xl mr-3">📅</span>
+            <h2 class="text-lg font-bold text-maroon">1. ข้อมูลการให้บริการ</h2>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label>วันที่ใช้บริการ<span class="required-mark">*</span></label>
+            <input type="date" name="serviceDate" id="serviceDate" class="input-field cursor-pointer" required>
+          </div>
+          <div>
+            <label>ประเภทผู้ป่วย<span class="required-mark">*</span></label>
+            <select name="patientType" id="patientType" class="input-field" onchange="toggleAN()" required>
+              <option value="">-- เลือกประเภท --</option>
+              <option value="ผู้ป่วยใหม่ OPD">ผู้ป่วยใหม่ OPD</option>
+              <option value="ผู้ป่วยใหม่ IPD">ผู้ป่วยใหม่ IPD</option>
+              <option value="ผู้ป่วยใหม่ ชุมชน">ผู้ป่วยใหม่ ชุมชน</option>
+              <option value="ผู้ป่วยเก่า OPD">ผู้ป่วยเก่า OPD</option>
+              <option value="ผู้ป่วยเก่า IPD">ผู้ป่วยเก่า IPD</option>
+              <option value="ผู้ป่วยเก่า ชุมชน">ผู้ป่วยเก่า ชุมชน</option>
+            </select>
+          </div>
+          <div>
+            <label>HN<span class="required-mark">*</span></label>
+            <input type="text" name="hn" class="input-field" placeholder="ระบุเลข HN" required>
+          </div>
+          <div id="an-container" class="hidden">
+            <label>AN</label>
+            <input type="text" name="an" class="input-field" placeholder="ระบุเลข AN">
+          </div>
+        </div>
+      </div>
+
+      <div id="sec2" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden scroll-mt-16">
+        <div class="bg-red-50 px-6 py-4 border-l-8 border-maroon flex items-center">
+            <span class="text-2xl mr-3">👤</span>
+            <h2 class="text-lg font-bold text-maroon">2. ข้อมูลผู้ใช้บริการ</h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+                <div class="md:col-span-2">
+                    <label>ชื่อ - นามสกุล<span class="required-mark">*</span></label>
+                    <input type="text" name="fullName" class="input-field" placeholder="ระบุชื่อและนามสกุล" required>
+                </div>
+                <div>
+                    <label>เลขบัตรประชาชน / Passport<span class="required-mark">*</span></label>
+                    <input type="text" name="idCard" id="idCard" class="input-field" placeholder="เลข 13 หลัก หรือเลข Passport" required maxlength="20">
+                    <p id="idCardMsg" class="text-xs mt-1"></p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                    <label>อายุ (ปี)<span class="required-mark">*</span></label>
+                    <input type="number" name="age" min="0" max="130" class="input-field" placeholder="ระบุอายุ" required>
+                    </div>
+                    <div>
+                    <label>กลุ่มเป้าหมาย<span class="required-mark">*</span></label>
+                    <select name="targetGroup" class="input-field" required>
+                        <option value="เด็ก (0 - 12 ปี)">เด็ก (0 - 12 ปี)</option>
+                        <option value="13 - 59 ปี">13 - 59 ปี</option>
+                        <option value="ผู้สูงอายุ (60 ปีขึ้นไป)">ผู้สูงอายุ (60 ปีขึ้นไป)</option>
+                        <option value="คนพิการ">คนพิการ</option>
+                    </select>
+                    </div>
+                </div>
+                <div>
+                    <label>สัญชาติ</label>
+                    <select id="nationalitySelect" class="input-field" onchange="checkNationality()">
+                    <option value="ไทย">ไทย</option>
+                    <option value="เมียนมา">เมียนมา</option>
+                    <option value="ลาว">ลาว</option>
+                    <option value="กัมพูชา">กัมพูชา</option>
+                    <option value="other">อื่นๆ (ระบุ)</option>
+                    </select>
+                    <input type="text" name="nationality" id="nationalityInput" value="ไทย" class="input-field mt-2 hidden" placeholder="ระบุสัญชาติ">
+                </div>
+                <div>
+                    <label>สิทธิการรักษา<span class="required-mark">*</span></label>
+                    <select name="insurance" class="input-field" required>
+                    <option value="ประกันสุขภาพแห่งชาติ">ประกันสุขภาพแห่งชาติ (บัตรทอง)</option>
+                    <option value="ประกันสังคม">ประกันสังคม</option>
+                    <option value="เบิกจ่ายตรงกรมบัญชีกลาง">เบิกจ่ายตรงกรมบัญชีกลาง</option>
+                    <option value="เบิกต้นสังกัด">เบิกต้นสังกัด</option>
+                    <option value="รัฐวิสาหกิจ">รัฐวิสาหกิจ</option>
+                    <option value="ประกันสุขภาพแรงงานต่างด้าว">ประกันสุขภาพแรงงานต่างด้าว</option>
+                    <option value="ผู้มีปัญหาสถานะสิทธิ">ผู้มีปัญหาสถานะสิทธิ</option>
+                    <option value="ไม่มีสิทธิ">ไม่มีสิทธิ</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-5 bg-gray-50 rounded-lg border border-gray-300">
+            <p class="text-sm font-bold text-gray-800 mb-3 flex items-center uppercase tracking-wide"><span class="mr-2">🏠</span>ที่อยู่ปัจจุบัน</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs text-gray-500 mb-1">จังหวัด</label>
+                    <select id="province" name="province" class="input-field" required></select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 mb-1">อำเภอ</label>
+                    <select id="district" name="district" class="input-field" required></select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 mb-1">ตำบล</label>
+                    <select id="subDistrict" name="subDistrict" class="input-field" required></select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500 mb-1">หมู่ที่</label>
+                    <select name="moo" class="input-field">
+                    <option value="-">-</option>
+                    <script>for(let i=1;i<=12;i++) document.write(`<option value="${i}">${i}</option>`);</script>
+                    </select>
+                </div>
+            </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="sec3" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden scroll-mt-16">
+        <div class="bg-red-50 px-6 py-4 border-l-8 border-maroon flex items-center">
+             <span class="text-2xl mr-3">🏥</span>
+            <h2 class="text-lg font-bold text-maroon">3. ข้อมูลทางคลินิกและสังคม</h2>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <div>
+                <label>กลุ่มผู้ใช้บริการแยกตามการเจ็บป่วย<span class="required-mark">*</span></label>
+                <div class="relative">
+                    <select name="illnessGroup" class="input-field appearance-none" required>
+                        <option value="สุขภาพปกติ">สุขภาพปกติ</option>
+                        <option value="เจ็บป่วยทั่วไป">เจ็บป่วยทั่วไป</option>
+                        <option value="เจ็บป่วยโรคเรื้อรัง">เจ็บป่วยโรคเรื้อรัง</option>
+                        <option value="อุบัติเหตุจราจร">อุบัติเหตุจราจร</option>
+                        <option value="อุบัติเหตุจากการทำงาน">อุบัติเหตุจากการทำงาน</option>
+                        <option value="อุบัติเหตุทั่วไป">อุบัติเหตุทั่วไป</option>
+                        <option value="เจ็บป่วยโรคติดต่อ">เจ็บป่วยโรคติดต่อ</option>
+                        <option value="ติดเชื้อเอดส์/โรคเอดส์">ติดเชื้อเอดส์/โรคเอดส์</option>
+                        <option value="การตั้งครรภ์และการคลอด">การตั้งครรภ์และการคลอด</option>
+                        <option value="เจ็บป่วยจากการทำแท้ง">เจ็บป่วยจากการทำแท้ง</option>
+                        <option value="เจ็บป่วยจากการถูกข่มขืน">เจ็บป่วยจากการถูกข่มขืน</option>
+                        <option value="ถูกทำร้ายร่างกาย/OSCC">ถูกทำร้ายร่างกาย/OSCC</option>
+                        <option value="ปัญหาสุขภาพจิต">ปัญหาสุขภาพจิต</option>
+                        <option value="พิการ">พิการ</option>
+                        <option value="ติดสารเสพติด">ติดสารเสพติด</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="p-2 bg-red-100 rounded inline-block text-maroon mb-3 border border-red-200">การประเมินปัญหาทางสังคม (เบื้องต้น)</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาเศรษฐกิจ" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>ปัญหาเศรษฐกิจ</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาการดูแล" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>ปัญหาการดูแล</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาอารมณ์และจิตใจ" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>อารมณ์/จิตใจ</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาครอบครัว" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>ปัญหาครอบครัว</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาทางกฎหมาย" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>ปัญหาทางกฎหมาย</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาทางสังคม" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>ปัญหาทางสังคม</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาที่เกี่ยวกับผู้ป่วยและญาติในการรักษาพยาบาล" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>ผู้ป่วย/ญาติ</span></label>
+                    <label class="flex items-center space-x-2 bg-white border-2 border-gray-200 p-3 rounded-lg hover:bg-red-50 hover:border-maroon transition cursor-pointer shadow-sm"><input type="checkbox" name="initialAssessment" value="ปัญหาการใช้สิทธิในการรักษาพยาบาล" class="text-maroon h-4 w-4 rounded focus:ring-red-900"> <span>การใช้สิทธิรักษา</span></label>
+                </div>
+            </div>
+
+            <div>
+                <label class="p-2 bg-green-100 rounded inline-block text-green-800 mb-3 border border-green-200">การให้บริการ (เลือกได้มากกว่า 1)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การประเมินและวินิจฉัยทางสังคม" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การประเมินและวินิจฉัยทางสังคม</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การให้คำแนะนำ (Advise)" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การให้คำแนะนำ (Advise)</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การให้คำปรึกษา (Counselling)" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การให้คำปรึกษา (Counselling)</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การช่วยเหลือปัญหาสังคม" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การช่วยเหลือปัญหาสังคม</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การขึ้นทะเบียนสิทธิ" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การขึ้นทะเบียนสิทธิ</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การช่วยเหลือทางเศรษฐกิจ" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การช่วยเหลือทางเศรษฐกิจ</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การบำบัดทางสังคม" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การบำบัดทางสังคม</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การสนับสนุนนมผงผสม" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การสนับสนุนนมผงผสม</span></label>
+                     <label class="flex items-center space-x-3 p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-600 transition shadow-sm"><input type="checkbox" name="serviceProvided" value="การเยี่ยมบ้าน" class="text-green-700 h-5 w-5 rounded focus:ring-green-700"> <span>การเยี่ยมบ้าน</span></label>
+                </div>
+            </div>
+
+            <div>
+                <label>การช่วยเหลือทางเศรษฐกิจ (ระบุ)</label>
+                <input type="text" name="economicHelp" placeholder="เช่น ค่าพาหนะ 100 บาท" class="input-field">
+            </div>
+        </div>
+      </div>
+
+      <div id="sec4" class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden scroll-mt-16">
+        <div class="bg-red-50 px-6 py-4 border-l-8 border-maroon flex items-center justify-between">
+            <div class="flex items-center">
+                <span class="text-2xl mr-3">📋</span>
+                <h2 class="text-lg font-bold text-maroon">4. การวินิจฉัยปัญหาทางสังคม (Social Problem List)</h2>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="bg-white p-4 rounded-xl border-2 border-gray-200 mb-4 h-96 overflow-y-auto custom-scrollbar shadow-inner">
+                <div id="socialProblemContainer" class="space-y-3">
+                    <div class="flex justify-center items-center h-full text-gray-400">
+                        <svg class="animate-spin h-8 w-8 mr-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        กำลังโหลดรายการ...
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label>รายละเอียดเพิ่มเติม (Note)</label>
+                <textarea name="socialDetail" rows="3" class="input-field" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
+            </div>
+        </div>
+      </div>
+
+      <div class="pt-4 pb-12">
+        <button type="submit" id="submitBtn" class="w-full bg-maroon text-white font-bold py-4 px-6 rounded-xl hover-bg-maroon hover:shadow-lg transform hover:-translate-y-1 transition duration-300 shadow-md flex items-center justify-center text-lg border-2 border-transparent">
+           <span class="mr-2">💾</span> บันทึกข้อมูลเข้าสู่ระบบ
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const subDistrictSelect = document.getElementById('subDistrict');
+
+    let provincesData = [];
+    let districtsData = [];
+    let subDistrictsData = [];
+
+    const ADDRESS_CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 วัน
+
+    async function cachedFetchJson(url, cacheKey) {
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const obj = JSON.parse(cached);
+                if (Date.now() - obj.ts < ADDRESS_CACHE_TTL && obj.data) {
+                    return obj.data;
+                }
+            }
+        } catch (e) { /* localStorage อ่านพลาด ก็โหลดใหม่จากเน็ตแทน */ }
+
+        const res = await fetch(url);
+        const data = await res.json();
+        try {
+            localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data }));
+        } catch (e) { /* เต็ม quota ก็ข้ามการ cache ไป */ }
+        return data;
+    }
+
+    let editId = null;
+
+    window.onload = async function () {
+        loadNav('sw-header-dark', 'form');
+        document.getElementById('serviceDate').valueAsDate = new Date();
+        loadSocialProblems();
+        await loadAddressData();
+
+        const params = new URLSearchParams(window.location.search);
+        editId = params.get('id');
+
+        if (editId) {
+            await enterEditMode(editId);
+        } else {
+            restoreDraftIfAny();
+        }
+
+        attachAutosaveListeners();
+        setupStepScrollSpy();
+        setupIdCardValidation();
+    };
+
+    async function loadAddressData() {
+        try {
+            const [provincesData_, districtsData_, subDistrictsData_] = await Promise.all([
+                cachedFetchJson('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api/latest/province.json', 'sw_province_cache'),
+                cachedFetchJson('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api/latest/district.json', 'sw_district_cache'),
+                cachedFetchJson('https://raw.githubusercontent.com/kongvut/thai-province-data/master/api/latest/sub_district.json', 'sw_subdistrict_cache')
+            ]);
+            provincesData = provincesData_;
+            districtsData = districtsData_;
+            subDistrictsData = subDistrictsData_;
+
+            provincesData.forEach(p => {
+                let option = new Option(p.name_th, p.name_th);
+                option.dataset.id = p.id;
+                provinceSelect.add(option);
+            });
+
+            provinceSelect.value = "ราชบุรี";
+            populateDistrict();
+            districtSelect.value = "ดำเนินสะดวก";
+            populateSubDistrict();
+
+        } catch (err) {
+            console.error("Address Load Error", err);
+            Swal.fire('แจ้งเตือน', 'โหลดข้อมูลจังหวัด/อำเภอ/ตำบลไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้าใหม่', 'warning');
+        }
+    }
+
+    provinceSelect.addEventListener('change', populateDistrict);
+    districtSelect.addEventListener('change', populateSubDistrict);
+
+    function populateDistrict() {
+        districtSelect.innerHTML = '';
+        subDistrictSelect.innerHTML = '';
+        const selectedProvName = provinceSelect.value;
+        const provObj = provincesData.find(p => p.name_th === selectedProvName);
+        if (!provObj) return;
+
+        const filteredDistricts = districtsData.filter(d => d.province_id === provObj.id);
+        filteredDistricts.forEach(d => {
+            let option = new Option(d.name_th, d.name_th);
+            option.dataset.id = d.id;
+            districtSelect.add(option);
+        });
+        populateSubDistrict();
+    }
+
+    function populateSubDistrict() {
+        subDistrictSelect.innerHTML = '';
+        const selectedDistName = districtSelect.value;
+        const distObj = districtsData.find(d => d.name_th === selectedDistName);
+        if (!distObj) return;
+
+        const filteredSubDistricts = subDistrictsData.filter(s => s.district_id === distObj.id);
+        filteredSubDistricts.forEach(s => {
+            let option = new Option(s.name_th, s.name_th);
+            subDistrictSelect.add(option);
+        });
+    }
+
+    function toggleAN() {
+        const type = document.getElementById('patientType').value;
+        const anDiv = document.getElementById('an-container');
+        if (type.includes('IPD')) {
+            anDiv.classList.remove('hidden');
+        } else {
+            anDiv.classList.add('hidden');
+        }
+    }
+
+    function checkNationality() {
+        const select = document.getElementById('nationalitySelect');
+        const input = document.getElementById('nationalityInput');
+        if (select.value === 'other') {
+            input.classList.remove('hidden');
+            input.value = '';
+            input.focus();
+        } else {
+            input.classList.add('hidden');
+            input.value = select.value;
+        }
+    }
+
+    function isValidThaiID(id) {
+        id = (id || '').replace(/[^0-9]/g, '');
+        if (id.length !== 13) return null;
+        let sum = 0;
+        for (let i = 0; i < 12; i++) sum += parseInt(id.charAt(i), 10) * (13 - i);
+        const check = (11 - (sum % 11)) % 10;
+        return check === parseInt(id.charAt(12), 10);
+    }
+
+    function setupIdCardValidation() {
+        const idCardInput = document.getElementById('idCard');
+        idCardInput.addEventListener('input', validateIdCardUI);
+    }
+
+    function validateIdCardUI() {
+        const idCardInput = document.getElementById('idCard');
+        const msg = document.getElementById('idCardMsg');
+        const val = idCardInput.value.trim();
+        const digitsOnly = /^[0-9]{13}$/.test(val);
+
+        idCardInput.classList.remove('border-red-500', 'border-green-500');
+        if (!digitsOnly) {
+            msg.textContent = val ? 'หากเป็น Passport ต่างชาติ ไม่ต้องกังวลกับข้อความนี้' : '';
+            msg.className = 'text-xs mt-1 text-gray-400';
+            return true;
+        }
+
+        const valid = isValidThaiID(val);
+        if (valid) {
+            idCardInput.classList.add('border-green-500');
+            msg.textContent = '✓ เลขบัตรประชาชนถูกต้อง';
+            msg.className = 'text-xs mt-1 text-green-600 font-semibold';
+        } else {
+            idCardInput.classList.add('border-red-500');
+            msg.textContent = '✗ เลขบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+            msg.className = 'text-xs mt-1 text-red-600 font-semibold';
+        }
+        return valid;
+    }
+
+    function setupStepScrollSpy() {
+        const sections = ['sec1', 'sec2', 'sec3', 'sec4'].map(id => document.getElementById(id));
+        const links = document.querySelectorAll('.step-link');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    links.forEach(l => l.classList.remove('step-active'));
+                    const activeLink = document.querySelector(`.step-link[href="#${entry.target.id}"]`);
+                    if (activeLink) activeLink.classList.add('step-active');
+                }
+            });
+        }, { rootMargin: '-30% 0px -60% 0px' });
+        sections.forEach(s => { if (s) observer.observe(s); });
+    }
+
+    const DRAFT_KEY = 'sw_form_draft_v1';
+    let autosaveTimer = null;
+
+    function attachAutosaveListeners() {
+        if (editId) return;
+        const form = document.getElementById('socialForm');
+        form.addEventListener('input', () => {
+            clearTimeout(autosaveTimer);
+            autosaveTimer = setTimeout(saveDraft, 800);
+        });
+        form.addEventListener('change', () => {
+            clearTimeout(autosaveTimer);
+            autosaveTimer = setTimeout(saveDraft, 800);
+        });
+    }
+
+    function collectFormAsObject() {
+        const form = document.getElementById('socialForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        data.initialAssessment = formData.getAll('initialAssessment');
+        data.serviceProvided = formData.getAll('serviceProvided');
+        data.socialProb = formData.getAll('socialProb');
+        return data;
+    }
+
+    function saveDraft() {
+        try {
+            const data = collectFormAsObject();
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({ ts: Date.now(), data }));
+        } catch (e) { /* ไม่ critical */ }
+    }
+
+    function clearDraft(hideBanner) {
+        localStorage.removeItem(DRAFT_KEY);
+        if (hideBanner) document.getElementById('draftBanner').classList.add('hidden');
+    }
+
+    function restoreDraftIfAny() {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const obj = JSON.parse(raw);
+            if (Date.now() - obj.ts > 3 * 24 * 60 * 60 * 1000) {
+                clearDraft(false);
+                return;
+            }
+            applyFormValues(obj.data);
+            document.getElementById('draftBanner').classList.remove('hidden');
+        } catch (e) { /* ข้าม */ }
+    }
+
+    function setSelectValue(name, value) {
+        const el = document.querySelector(`[name=${name}]`);
+        if (el && value !== undefined) el.value = value;
+    }
+
+    function checkBoxByValue(name, value) {
+        const el = document.querySelector(`input[name="${name}"][value="${CSS.escape(value)}"]`);
+        if (el) el.checked = true;
+    }
+
+    function applyFormValues(data) {
+        if (!data) return;
+        if (data.serviceDate) document.getElementById('serviceDate').value = data.serviceDate;
+        if (data.patientType) { setSelectValue('patientType', data.patientType); toggleAN(); }
+        if (data.hn) document.querySelector('[name=hn]').value = data.hn;
+        if (data.an) document.querySelector('[name=an]').value = data.an;
+        if (data.fullName) document.querySelector('[name=fullName]').value = data.fullName;
+        if (data.idCard) { document.getElementById('idCard').value = data.idCard; validateIdCardUI(); }
+        if (data.age) document.querySelector('[name=age]').value = data.age;
+        if (data.targetGroup) setSelectValue('targetGroup', data.targetGroup);
+        if (data.insurance) setSelectValue('insurance', data.insurance);
+        if (data.moo) setSelectValue('moo', data.moo);
+        if (data.illnessGroup) setSelectValue('illnessGroup', data.illnessGroup);
+        if (data.economicHelp) document.querySelector('[name=economicHelp]').value = data.economicHelp;
+        if (data.socialDetail) document.querySelector('[name=socialDetail]').value = data.socialDetail;
+
+        (data.initialAssessment || []).forEach(v => checkBoxByValue('initialAssessment', v));
+        (data.serviceProvided || []).forEach(v => checkBoxByValue('serviceProvided', v));
+        (data.socialProb || []).forEach(v => checkBoxByValue('socialProb', v));
+
+        if (data.nationality) {
+            const select = document.getElementById('nationalitySelect');
+            const options = Array.from(select.options).map(o => o.value);
+            if (options.includes(data.nationality)) {
+                select.value = data.nationality;
+            } else {
+                select.value = 'other';
+                document.getElementById('nationalityInput').classList.remove('hidden');
+                document.getElementById('nationalityInput').value = data.nationality;
+            }
+        }
+    }
+
+    async function enterEditMode(id) {
+        try {
+            const res = await apiGet('getRecord', { id });
+            if (!res.success) {
+                await Swal.fire('ไม่พบข้อมูล', res.error, 'error');
+                window.location.href = 'search.html';
+                return;
+            }
+            const data = res.data;
+            document.getElementById('editBanner').classList.remove('hidden');
+            document.getElementById('editBannerName').innerText = data.fullName;
+
+            applyFormValues({
+                serviceDate: data.serviceDate,
+                patientType: data.patientType,
+                hn: data.hn,
+                an: data.an,
+                fullName: data.fullName,
+                idCard: data.idCard,
+                age: data.age,
+                targetGroup: data.targetGroup,
+                nationality: data.nationality,
+                insurance: data.insurance,
+                moo: data.moo,
+                illnessGroup: data.illnessGroup,
+                economicHelp: data.economicHelp,
+                socialDetail: data.socialDetail,
+                initialAssessment: data.initialAssessment,
+                serviceProvided: data.serviceProvided,
+                socialProb: Object.values(data.socialProblemsObj || {}).flat()
+            });
+
+            if (data.province) {
+                provinceSelect.value = data.province;
+                populateDistrict();
+                if (data.district) {
+                    districtSelect.value = data.district;
+                    populateSubDistrict();
+                    if (data.subDistrict) subDistrictSelect.value = data.subDistrict;
+                }
+            }
+
+            document.getElementById('submitBtn').innerHTML = '<span class="mr-2">💾</span> อัปเดตข้อมูล';
+        } catch (err) {
+            showApiError(err);
+        }
+    }
+
+    const socialProblemsList = {
+        "00": { name: "ไม่มีปัญหาทางสังคม (No Social Problem)", sub: [] },
+        "01": { name: "ปัญหาคู่สมรสและการครองเรือน", sub: [
+            "0101 ปัญหาการสื่อสาร", "0102 การใช้ความรุนแรง", "0103 ทัศนคติ/วัฒนธรรมต่างกัน",
+            "0104 ไม่รับผิดชอบ/ผูกพันครอบครัวเดิม", "0105 นอกใจ/ชู้สาว", "0106 ปัญหาเพศสัมพันธ์", "0107 อื่นๆ"
+        ]},
+        "02": { name: "ปัญหาระหว่างบิดา มารดา บุตร", sub: [
+            "0201 พฤติกรรมไม่เหมาะสม (สุรา/ยา/พนัน)", "0202 การเลี้ยงดู (ไม่มีเวลา/ตามใจ)",
+            "0203 ทัศนคติ (ลำเอียง/ไม่ยอมรับ)", "0204 เพศสัมพันธ์ในสายเลือด", "0205 บุตรบุญธรรม",
+            "0206 ทารุณกรรม/ทอดทิ้ง", "0207 ขาดความรู้พัฒนาการ", "0208 ผิดปกติบุคลิก/จิต", "0209 อื่นๆ"
+        ]},
+        "03": { name: "ปัญหาความแตกแยกในครอบครัว", sub: [
+            "0301 หย่า/ร้าง", "0302 แยกกันอยู่ (งาน/โรค/จำคุก)", "0303 สมาชิกเสียชีวิต", "0304 สูญหาย", "0305 อื่นๆ"
+        ]},
+        "04": { name: "ปัญหาความสัมพันธ์ระหว่างเครือญาติ", sub: [
+            "0401 ไม่เข้าใจ/ทะเลาะเบาะแว้ง", "0402 ผลประโยชน์/มรดก", "0403 แม่ผัวลูกสะใภ้/เขย", "0404 อื่นๆ"
+        ]},
+        "05": { name: "ปัญหาความรัก", sub: [
+            "0501 ผิดหวัง/ถูกปฏิเสธ", "0502 ขัดแย้งกับคนรัก", "0503 สูญเสีย/พลัดพราก", "0504 แอบรัก", "0505 รักสามเส้า/กิ๊ก", "0506 กลัวชีวิตคู่", "0507 อื่นๆ"
+        ]},
+        "06": { name: "ปัญหาทางเพศ", sub: [
+            "0601 ถูกข่มขืน/ล่วงละเมิด", "0602 เพศสัมพันธ์ไม่เหมาะสม", "0603 ไม่พอใจเพศตนเอง", "0604 ผิดปกติทางเพศ (ถ้ำมอง)", "0605 อื่นๆ"
+        ]},
+        "07": { name: "ภาระดูแลผู้เจ็บป่วย/พิการ/สูงอายุ", sub: [
+            "0701 ดูแลผู้สูงอายุจนเครียด", "0702 ดูแลผู้ป่วยเรื้อรัง/พิการ", "0703 อื่นๆ"
+        ]},
+        "08": { name: "ที่อยู่อาศัย/สิ่งแวดล้อม", sub: [
+            "0801 ไม่มีบ้าน", "0802 ไม่ถูกสุขลักษณะ/แออัด", "0803 ยั่วยุกามารมณ์/ยาเสพติด", "0804 สิ่งแวดล้อมเป็นพิษ",
+            "0805 ย้ายโดยสมัครใจ", "0806 ย้ายโดยไม่สมัครใจ/ไล่ที่", "0807 ผู้ป่วยเร่ร่อน", "0808 อื่นๆ"
+        ]},
+        "09": { name: "ปัญหาจากบุคคลอื่นนอกครอบครัว", sub: [
+            "0901 เข้ากับเพื่อนบ้านไม่ได้", "0902 ถูกรังเกียจ/กลั่นแกล้ง", "0903 ถูกตัดสัมพันธ์", "0904 เพื่อนเสียชีวิต", "0905 อื่นๆ"
+        ]},
+        "10": { name: "ปัญหาการเงิน", sub: [
+            "1001 รายได้ไม่พอ/ไม่มีรายได้", "1002 หนี้สิน", "1003 ค่ารักษาพยาบาล", "1004 ถูกโกง", "1005 อื่นๆ"
+        ]},
+        "11": { name: "ปัญหาการศึกษา", sub: [
+            "1101 ไม่สนใจเรียน/ติดเกม", "1102 ปัญหาการเรียนจากความเจ็บป่วย", "1103 ไม่สำเร็จตามหวัง", "1104 ขาดโอกาส/ทุน", "1105 ปัญหากับครู/เพื่อน", "1106 อื่นๆ"
+        ]},
+        "12": { name: "ปัญหาการประกอบอาชีพ", sub: [
+            "1201 ว่างงาน/ตกงาน", "1202 ปรับตัวไม่ได้", "1203 ไม่เป็นธรรม/ถูกเอาเปรียบ", "1204 อาชีพไม่มั่นคง/ขาดทุน", "1205 อื่นๆ"
+        ]},
+        "13": { name: "ปัญหาทางกฎหมาย", sub: [
+            "1301 คดีแพ่ง/อาญา", "1302 ไม่ได้รับสิทธิแรงงาน/ประกันสังคม", "1303 ไม่ได้รับสิทธิคนพิการ", "1304 ไม่ได้สิทธิบัตรทอง",
+            "1305 ไม่มีสถานะทางกฎหมาย", "1306 เข้าเมืองผิดกฎหมาย", "1307 อื่นๆ"
+        ]},
+        "14": { name: "อุปสรรคต่อการดูแลสุขภาพ", sub: [
+            "1401 ขาดความรู้/ไม่ร่วมมือ", "1402 สื่อสารไม่ได้/ภาษา", "1403 กลัวสังคมรังเกียจ", "1404 ไม่สะดวกรับบริการ",
+            "1405 ขาดผู้ดูแล", "1406 ญาติปฏิเสธ/เกี่ยงกัน", "1407 ผู้ป่วยซับซ้อน/จำหน่ายยาก", "1408 อื่นๆ"
+        ]},
+        "15": { name: "ความเชื่อ วัฒนธรรม การเมือง", sub: [
+            "1501 ความเชื่อไสยศาสตร์", "1502 ขัดแย้งการเมือง", "1503 สังคมไม่ยอมรับ (เพศ)", "1504 ปรับตัววัฒนธรรมใหม่", "1505 อื่นๆ"
+        ]},
+        "16": { name: "สารเสพติด", sub: [
+            "1601 สุรา", "1602 ยาเสพติด (ยาบ้า/เฮโรอีน)", "1603 ยาลดความอ้วน", "1604 ถูกหลอก/บังคับใช้", "1605 เสพซ้ำ", "1606 อื่นๆ"
+        ]},
+        "17": { name: "ปรากฏการณ์ทางสังคม/อื่นๆ", sub: [
+            "1701 ท้องไม่พร้อม", "1702 ท้องวัยรุ่น", "1703 แรงงานเด็ก/ข้ามชาติ", "1704 ค้ามนุษย์/ประเวณี",
+            "1705 โรคที่ต้องปิดบัง (เอดส์)", "1706 ภัยพิบัติ", "1707 ก่อการร้าย", "1708 อุบัติเหตุรุนแรง (กลุ่มชน)", "1709 อื่นๆ"
+        ]}
+    };
+
+    function loadSocialProblems() {
+        const container = document.getElementById('socialProblemContainer');
+        container.innerHTML = "";
+
+        const orderedKeys = [
+            "00", "01", "02", "03", "04", "05", "06", "07", "08",
+            "09", "10", "11", "12", "13", "14", "15", "16", "17"
+        ];
+
+        orderedKeys.forEach(key => {
+            const value = socialProblemsList[key];
+            if (!value) return;
+
+            const section = document.createElement('div');
+            section.className = "bg-white border-2 border-gray-100 rounded-lg overflow-hidden transition hover:border-red-300";
+
+            let html = `
+                <div class="px-4 py-3 bg-gray-50 cursor-pointer flex items-center justify-between hover:bg-white transition" onclick="toggleSection('${key}')">
+                   <div class="flex items-center font-bold text-gray-700">
+                        <span class="mr-3 text-xs bg-red-100 text-maroon px-2 py-1 rounded-md font-extrabold shadow-sm">${key}</span>
+                        ${value.name}
+                   </div>
+                   <svg id="icon-${key}" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div id="section-${key}" class="hidden border-t-2 border-gray-100 bg-white">
+                    <div class="p-3">
+            `;
+
+            if (value.sub.length === 0) {
+                 html += `<label class="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-red-50 cursor-pointer transition">
+                            <input type="checkbox" name="socialProb" value="00" class="form-checkbox h-5 w-5 text-maroon rounded focus:ring-red-900">
+                            <span class="ml-3 text-gray-700 font-medium">เลือกหัวข้อนี้</span>
+                          </label>`;
+            } else {
+                html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">`;
+                value.sub.forEach(subItem => {
+                    let code = subItem.split(' ')[0];
+                    html += `<label class="flex items-start p-2 rounded-lg border border-transparent hover:border-red-100 hover:bg-red-50 cursor-pointer transition">
+                                <input type="checkbox" name="socialProb" value="${code} ${subItem}" data-cat="${key}" class="mt-0.5 form-checkbox h-4 w-4 text-maroon rounded focus:ring-red-900">
+                                <span class="ml-2 text-gray-700 leading-snug">${subItem}</span>
+                             </label>`;
+                });
+                html += `</div>`;
+            }
+            html += `</div></div>`;
+            section.innerHTML = html;
+            container.appendChild(section);
+        });
+    }
+
+    window.toggleSection = function(key) {
+        const el = document.getElementById(`section-${key}`);
+        const icon = document.getElementById(`icon-${key}`);
+        el.classList.toggle('hidden');
+        if(!el.classList.contains('hidden')) {
+            icon.classList.add('rotate-180');
+        } else {
+            icon.classList.remove('rotate-180');
+        }
+    }
+
+    async function submitForm(e) {
+        e.preventDefault();
+
+        if (!validateIdCardUI()) {
+            Swal.fire('ตรวจสอบข้อมูล', 'เลขบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบก่อนบันทึก', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        const isEdit = !!editId;
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังบันทึก...';
+
+        Swal.fire({
+            title: isEdit ? 'กำลังอัปเดตข้อมูล' : 'กำลังบันทึกข้อมูล',
+            text: 'กรุณารอสักครู่...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading() }
+        });
+
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        data.initialAssessment = formData.getAll('initialAssessment');
+        data.serviceProvided = formData.getAll('serviceProvided');
+
+        let socialObj = {};
+        const allSocial = formData.getAll('socialProb');
+        allSocial.forEach(item => {
+            let code = item.split(' ')[0];
+            let cat = code.substring(0, 2);
+            if(item === "00") cat = "00";
+            if(!socialObj[cat]) socialObj[cat] = [];
+            socialObj[cat].push(item);
+        });
+        data.socialProblemsObj = JSON.stringify(socialObj);
+
+        try {
+            const res = isEdit
+                ? await apiPost('update', { ...data, id: editId })
+                : await apiPost('save', data);
+
+            if (res.success) {
+                clearDraft(false);
+                await Swal.fire({
+                    icon: 'success',
+                    title: isEdit ? 'อัปเดตสำเร็จ!' : 'บันทึกสำเร็จ!',
+                    text: isEdit ? 'แก้ไขข้อมูลเรียบร้อยแล้ว' : 'ข้อมูลถูกบันทึกเรียบร้อยแล้ว',
+                    confirmButtonColor: '#7f1d1d',
+                    timer: isEdit ? undefined : 2000,
+                    showConfirmButton: isEdit ? true : false,
+                    confirmButtonText: 'กลับไปหน้าค้นหา'
+                });
+                if (isEdit) {
+                    window.location.href = 'search.html';
+                    return;
+                }
+                document.getElementById('socialForm').reset();
+                document.getElementById('serviceDate').valueAsDate = new Date();
+                document.getElementById('idCardMsg').textContent = '';
+                btn.disabled = false;
+                btn.innerHTML = '<span class="mr-2">💾</span> บันทึกข้อมูลเข้าสู่ระบบ';
+                window.scrollTo(0,0);
+            } else {
+                Swal.fire('Error', res.error, 'error');
+                btn.disabled = false;
+                btn.innerHTML = isEdit ? '<span class="mr-2">💾</span> อัปเดตข้อมูล' : '<span class="mr-2">💾</span> บันทึกข้อมูลเข้าสู่ระบบ';
+            }
+        } catch (err) {
+            showApiError(err);
+            btn.disabled = false;
+            btn.innerHTML = isEdit ? '<span class="mr-2">💾</span> อัปเดตข้อมูล' : '<span class="mr-2">💾</span> บันทึกข้อมูลเข้าสู่ระบบ';
+        }
+    }
+  </script>
 </body>
 </html>
