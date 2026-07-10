@@ -1,0 +1,28 @@
+<style>
+  .sw-nav-link { transition: all .2s; }
+  .sw-nav-link.sw-active { opacity: .55; pointer-events: none; }
+  /* ธีมพื้นเข้ม (ใช้บน Header ไล่สีเลือดหมู เช่นหน้าแบบฟอร์ม) */
+  .sw-header-dark .sw-nav-link { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.4); color: #fff; }
+  .sw-header-dark .sw-nav-link:hover { background: rgba(255,255,255,0.2); }
+  .sw-header-dark .sw-nav-link[data-page="dashboard"] { background: #fff; color: #7f1d1d; border-color: #fff; }
+  .sw-header-dark .sw-nav-link[data-page="dashboard"]:hover { background: #fefce8; }
+  /* ธีมพื้นขาว (ใช้บน Header การ์ดขาว เช่นหน้า Dashboard/ค้นหา) */
+  .sw-header-light .sw-nav-link { background: #fff; border: 1px solid #e5e7eb; color: #374151; }
+  .sw-header-light .sw-nav-link:hover { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
+  .sw-header-light .sw-nav-link[data-page="dashboard"] { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .sw-header-light .sw-nav-link[data-page="dashboard"]:hover { background: #1d4ed8; }
+</style>
+<div id="swSharedNav" class="flex flex-wrap items-center gap-2 justify-center md:justify-end">
+  <a href="index.html" data-page="form"
+     class="sw-nav-link flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5">
+    <span class="mr-1.5">📝</span> หน้าบันทึกข้อมูล
+  </a>
+  <a href="search.html" data-page="search"
+     class="sw-nav-link flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5">
+    <span class="mr-1.5">🔍</span> ค้นหาประวัติ
+  </a>
+  <a href="dashboard.html" data-page="dashboard"
+     class="sw-nav-link flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5">
+    <span class="mr-1.5">📊</span> Dashboard
+  </a>
+</div>
